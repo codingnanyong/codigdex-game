@@ -1,7 +1,11 @@
 import Phaser from "phaser";
 import { findStage } from "@/lib/domain/chapters";
 import type { ChapterDefinition, MonsterDefinition, QuizQuestion } from "@/lib/domain/chapters/types";
-import { isSuccessfulCapture, requiredCorrectAnswers } from "@/lib/domain/dex/capture";
+import {
+  isSuccessfulCapture,
+  requiredCorrectAnswers,
+  shouldContinueBattle,
+} from "@/lib/domain/dex/capture";
 import { drawQuizQuestions, quizCountForLevel } from "@/lib/domain/dex/quiz";
 import { playAmbience } from "../ambience";
 import { AnswerGrid } from "../battle/answerGrid";
@@ -16,7 +20,7 @@ export interface CodeBattleData {
   monsterId: string;
 }
 
-/** Runs one battle: every question is asked, and landing the pass line of them drains HP to zero. */
+/** Runs one battle until its pass line is reached or its questions run out. */
 export class CodeBattleScene extends Phaser.Scene {
   private chapter!: ChapterDefinition;
   private monster!: MonsterDefinition;
@@ -104,7 +108,7 @@ export class CodeBattleScene extends Phaser.Scene {
 
   private advance() {
     this.questionIndex += 1;
-    if (this.questionIndex < this.questions.length) {
+    if (shouldContinueBattle(this.correctCount, this.questionIndex, this.questions.length)) {
       this.showQuestion();
       return;
     }

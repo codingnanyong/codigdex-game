@@ -18,6 +18,7 @@ export interface StoredGameStateV2 {
   player: {
     primaryJobId: string;
     secondaryJobId: string | null;
+    tertiaryJobId: string | null;
   };
   ui: {
     tutorialOnboardingSeen: boolean;
@@ -28,6 +29,7 @@ export interface SaveSnapshot {
   captures: StoredCapture[];
   primaryJobId: string;
   secondaryJobId: string | null;
+  tertiaryJobId: string | null;
   tutorialOnboardingSeen: boolean;
 }
 
@@ -38,6 +40,7 @@ export function createSave(snapshot: SaveSnapshot): StoredGameStateV2 {
     player: {
       primaryJobId: snapshot.primaryJobId,
       secondaryJobId: snapshot.secondaryJobId,
+      tertiaryJobId: snapshot.tertiaryJobId,
     },
     ui: { tutorialOnboardingSeen: snapshot.tutorialOnboardingSeen },
   };
@@ -63,6 +66,7 @@ export function parseSave(raw: string): StoredGameStateV2 | undefined {
     captures: validCaptures(value.progress.captures),
     primaryJobId: typeof value.player.primaryJobId === "string" ? value.player.primaryJobId : "junior",
     secondaryJobId: typeof value.player.secondaryJobId === "string" ? value.player.secondaryJobId : null,
+    tertiaryJobId: typeof value.player.tertiaryJobId === "string" ? value.player.tertiaryJobId : null,
     tutorialOnboardingSeen: value.ui.tutorialOnboardingSeen === true,
   });
 }
@@ -74,6 +78,7 @@ function migrateV1(value: Record<string, unknown>): StoredGameStateV2 | undefine
     captures: validCaptures(old.captures),
     primaryJobId: typeof old.selectedJob === "string" ? old.selectedJob : "junior",
     secondaryJobId: null,
+    tertiaryJobId: null,
     tutorialOnboardingSeen: old.tutorialOnboardingSeen === true,
   });
 }

@@ -14,7 +14,9 @@ interface CareerAtlasOptions {
 
 /** Turns a painted career wallpaper into a navigable atlas. */
 export function drawCareerAtlas(scene: Phaser.Scene, options: CareerAtlasOptions) {
-  options.path.regions.forEach((region, index) => drawRegion(scene, region, index + 1, options.onRegion));
+  options.path.regions.forEach((region, index) =>
+    drawRegion(scene, region, index + 1, options.onRegion)
+  );
 
   const guideFrame = drawOrnateFrame(scene, 132, 111, 224, 78, { fillAlpha: 0.94, radius: 10 }).setDepth(5);
   const guide = scene.add
@@ -65,36 +67,14 @@ function drawRegion(
   order: number,
   onSelect: (region: CareerRegion) => void
 ) {
-  const radius = region.radius;
-  const landmark = region.landmark;
-  const landmarkHitArea = landmark
-    ? scene.add
-        .rectangle(landmark.x, landmark.y, landmark.width, landmark.height, 0xffffff, 0.001)
-        .setStrokeStyle(3, PALETTE.amber, 0)
-        .setInteractive({ useHandCursor: true })
-        .setDepth(3)
-    : undefined;
-  // The painted disc remains visible. This transparent circle makes the
-  // whole disc clickable, while the ring only signals interactivity.
-  const hitArea = scene.add
-    .circle(region.x, region.y, radius + 7, 0xffffff, 0.001)
+  const { landmark } = region;
+  const focus = scene.add
+    .polygon(landmark.x, landmark.y, region.focusPoints, PALETTE.amber, 0)
+    .setStrokeStyle(2, PALETTE.amber, 0)
     .setInteractive({ useHandCursor: true })
-    .setDepth(5);
-  const ring = scene.add
-    .circle(region.x, region.y, radius, PALETTE.cream, 0)
-    .setStrokeStyle(3, PALETTE.amber, 0.95)
-    .setDepth(4);
-  const number = scene.add
-    .text(region.x, region.y, String(order), {
-      ...pixelText("caption"),
-      color: PALETTE_HEX.cream,
-      backgroundColor: "#6f2639dd",
-      padding: { x: 4, y: 2 },
-    })
-    .setOrigin(0.5)
     .setDepth(4);
   const label = scene.add
-    .text(region.x, region.y - 29, region.label, {
+    .text(landmark.x, landmark.y - landmark.height / 2 + 10, `${order} · ${region.label}`, {
       ...pixelText("caption"),
       color: PALETTE_HEX.cream,
       backgroundColor: "#2a1d14df",
@@ -104,25 +84,17 @@ function drawRegion(
     .setDepth(5);
 
   const activate = () => {
-    ring.setScale(1.12).setStrokeStyle(4, PALETTE.cream, 1);
-    landmarkHitArea?.setStrokeStyle(3, PALETTE.cream, 0.95);
+    focus.setFillStyle(PALETTE.amber, 0.2).setStrokeStyle(3, PALETTE.cream, 1);
     label.setScale(1.04);
   };
   const deactivate = () => {
-    ring.setScale(1).setStrokeStyle(3, PALETTE.amber, 0.95);
-    landmarkHitArea?.setStrokeStyle(3, PALETTE.amber, 0);
+    focus.setFillStyle(PALETTE.amber, 0).setStrokeStyle(2, PALETTE.amber, 0);
     label.setScale(1);
   };
   const select = () => onSelect(region);
 
-  const entryTargets: Phaser.GameObjects.GameObject[] = [hitArea];
-  if (landmarkHitArea) entryTargets.push(landmarkHitArea);
-  entryTargets.forEach((entry) => {
-    entry.on("pointerover", activate);
-    entry.on("pointerout", deactivate);
-    entry.on("pointerup", select);
-  });
-  const objects: Phaser.GameObjects.GameObject[] = [ring, number, label, hitArea];
-  if (landmarkHitArea) objects.unshift(landmarkHitArea);
-  return scene.add.container(0, 0, objects);
+  focus.on("pointerover", activate);
+  focus.on("pointerout", deactivate);
+  focus.on("pointerup", select);
+  return scene.add.container(0, 0, [focus, label]);
 }

@@ -2,6 +2,7 @@ import Phaser from "phaser";
 import type { ChapterStatus } from "@/lib/domain/chapters";
 import { PALETTE, PALETTE_HEX } from "../palette";
 import { pixelText } from "../pixelFont";
+import { fitTextInside } from "../ui";
 import {
   CAREER_HEIGHT,
   CAREER_WIDTH,
@@ -54,6 +55,7 @@ export function drawPathNode(scene: Phaser.Scene, node: PathNode, state: PathNod
       color: lit ? PALETTE_HEX.ink : PALETTE_HEX.cream,
     })
     .setOrigin(0, 0.5);
+  fitTextInside(label, width / 2 - textLeft - 28, height - 10);
   const glyph = scene.add
     .text(width / 2 - 16, 0, lit ? "▶" : "◆", {
       ...pixelText("caption"),
@@ -101,31 +103,59 @@ export function drawPromotionNode(
       color: PALETTE_HEX.cream,
     })
     .setOrigin(0.5);
+  fitTextInside(label, PROMOTION_SIZE - 10, 22);
 
   const card = scene.add.container(node.x, node.y, [panel, ring, star, label]);
   makePressable(card, new Phaser.Geom.Rectangle(-half, -half, PROMOTION_SIZE, PROMOTION_SIZE), 1.04, onSelect);
 }
 
-/** A locked silhouette for a future tier-two job; its real name stays hidden. */
-export function drawMysteryCareerNode(
+/** A tier-two node: mystery until both required primary paths are complete. */
+export function drawSecondaryCareerNode(
   scene: Phaser.Scene,
   x: number,
   y: number,
-  onSelect: () => void
+  options: {
+    name: string;
+    unlocked: boolean;
+    selected: boolean;
+    onSelect: () => void;
+    tierLabel?: "2차 전직" | "3차 전직";
+  }
 ) {
   const width = 104;
   const height = 54;
   const panel = scene.add
-    .rectangle(0, 0, width, height, PALETTE.nightBrown, 0.96)
-    .setStrokeStyle(2, PALETTE.mutedBrown);
+    .rectangle(
+      0,
+      0,
+      width,
+      height,
+      options.selected ? PALETTE.sand : options.unlocked ? PALETTE.cream : PALETTE.nightBrown,
+      0.96
+    )
+    .setStrokeStyle(2, options.unlocked ? PALETTE.amber : PALETTE.mutedBrown);
   const eyebrow = scene.add
-    .text(0, -13, "2차 전직", { ...pixelText("caption"), color: PALETTE_HEX.sand })
+    .text(0, -13, options.selected ? `${options.tierLabel ?? "2차 전직"} · 현재` : options.tierLabel ?? "2차 전직", {
+      ...pixelText("caption"),
+      color: options.unlocked ? PALETTE_HEX.maroon : PALETTE_HEX.sand,
+    })
     .setOrigin(0.5);
   const label = scene.add
-    .text(0, 11, "◆  ???", { ...pixelText("body"), color: PALETTE_HEX.cream })
+    .text(0, 11, options.unlocked ? options.name : "◆  ???", {
+      ...pixelText("caption"),
+      color: options.unlocked ? PALETTE_HEX.ink : PALETTE_HEX.cream,
+      align: "center",
+      wordWrap: { width: width - 10 },
+    })
     .setOrigin(0.5);
+  fitTextInside(label, width - 10, 22);
   const card = scene.add.container(x, y, [panel, eyebrow, label]);
-  makePressable(card, new Phaser.Geom.Rectangle(-width / 2, -height / 2, width, height), 1.035, onSelect);
+  makePressable(
+    card,
+    new Phaser.Geom.Rectangle(-width / 2, -height / 2, width, height),
+    1.035,
+    options.onSelect
+  );
   return card;
 }
 

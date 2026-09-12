@@ -1,6 +1,7 @@
 import type Phaser from "phaser";
 import { PALETTE, PALETTE_HEX } from "../palette";
 import { pixelText } from "../pixelFont";
+import { fitTextInside } from "../ui";
 
 /** Dark research-board backdrop: a faint grid inside a double frame. */
 export function drawMapSurface(scene: Phaser.Scene) {
@@ -19,7 +20,12 @@ export function drawMapSurface(scene: Phaser.Scene) {
   frame.strokeRect(20, 20, width - 40, height - 40);
 }
 
-export function drawHeader(scene: Phaser.Scene, careerName?: string) {
+export function drawHeader(
+  scene: Phaser.Scene,
+  careerName?: string,
+  secondaryCareerName?: string,
+  tertiaryCareerName?: string
+) {
   const { width } = scene.scale;
   const panel = scene.add.graphics();
   panel.fillStyle(PALETTE.ink, 0.95);
@@ -29,16 +35,28 @@ export function drawHeader(scene: Phaser.Scene, careerName?: string) {
   panel.fillStyle(PALETTE.amber, 1);
   panel.fillRect(170, 18, width - 340, 4);
 
-  scene.add
-    .text(width / 2, 34, careerName ? `${careerName} PATH` : "JUNIOR DEVELOPER PATH", {
+  const title = scene.add
+    .text(
+      width / 2,
+      34,
+      tertiaryCareerName
+        ? `${careerName} > ${secondaryCareerName} > ${tertiaryCareerName}`
+        : secondaryCareerName
+          ? `JUNIOR > ${careerName} > ${secondaryCareerName}`
+        : careerName
+          ? `JUNIOR > ${careerName}`
+          : "JUNIOR DEVELOPER PATH",
+      {
       ...pixelText("caption"),
       color: PALETTE_HEX.amber,
       letterSpacing: 2,
-    })
+      }
+    )
     .setOrigin(0.5);
+  fitTextInside(title, width - 380, 18);
 
   scene.add
-    .text(width / 2, 56, careerName ? "Git과 Linux를 익혀 선택한 직업으로 전직하세요" : "공통 기술을 익히고 원하는 직업으로 전직하세요", {
+    .text(width / 2, 56, tertiaryCareerName ? "2차 직업 마스터 경로를 완료해 3차 전직을 달성했어요" : secondaryCareerName ? "2차 직업의 마스터 경로를 완주하면 3차 전직이 열려요" : careerName ? "선택한 1차 직업의 전문 경로를 완주하세요" : "공통 기술을 익히고 원하는 직업으로 전직하세요", {
       ...pixelText("body"),
       color: PALETTE_HEX.cream,
     })

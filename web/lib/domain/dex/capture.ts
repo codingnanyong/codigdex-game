@@ -20,6 +20,11 @@ export function isSuccessfulCapture(correct: number, total: number): boolean {
   return total > 0 && correct >= requiredCorrectAnswers(total);
 }
 
+/** Keep asking questions only while the pass line is still unmet and questions remain. */
+export function shouldContinueBattle(correct: number, answered: number, total: number): boolean {
+  return answered < total && !isSuccessfulCapture(correct, total);
+}
+
 export function capturedIds(state: DexState): Set<string> {
   return new Set(state.cards.map((card) => card.id));
 }

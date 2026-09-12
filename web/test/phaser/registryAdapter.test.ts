@@ -1,7 +1,11 @@
 import type Phaser from "phaser";
 import { describe, expect, it, vi } from "vitest";
 import { DEX_MONSTERS } from "@/lib/domain/chapters";
-import { JOB_REGISTRY_KEY, SECONDARY_JOB_REGISTRY_KEY } from "@/lib/domain/player/jobs";
+import {
+  JOB_REGISTRY_KEY,
+  SECONDARY_JOB_REGISTRY_KEY,
+  TERTIARY_JOB_REGISTRY_KEY,
+} from "@/lib/domain/player/jobs";
 import {
   hasSavedProgress,
   hydrateRegistry,
@@ -126,7 +130,7 @@ describe("hydrateRegistry", () => {
     expect(JSON.parse(storage.getItem(SAVE_STORAGE_KEY)!)).toEqual({
       version: 2,
       progress: { captures: [{ id: first.id, capturedAt: "2026-09-01T00:00:00.000Z" }] },
-      player: { primaryJobId: "frontend", secondaryJobId: null },
+      player: { primaryJobId: "frontend", secondaryJobId: null, tertiaryJobId: null },
       ui: { tutorialOnboardingSeen: true },
     });
   });
@@ -170,7 +174,7 @@ describe("persistRegistry", () => {
     expect(JSON.parse(storage.getItem(SAVE_STORAGE_KEY)!)).toEqual({
       version: 2,
       progress: { captures: [{ id: first.id, capturedAt: "2026-09-01T00:00:00.000Z" }] },
-      player: { primaryJobId: "backend", secondaryJobId: null },
+      player: { primaryJobId: "backend", secondaryJobId: null, tertiaryJobId: null },
       ui: { tutorialOnboardingSeen: true },
     });
 
@@ -202,12 +206,13 @@ describe("resetGameProgress", () => {
     expect(readDexState(registry).cards).toEqual([]);
     expect(registry.get(JOB_REGISTRY_KEY)).toBe("junior");
     expect(registry.get(SECONDARY_JOB_REGISTRY_KEY)).toBeNull();
+    expect(registry.get(TERTIARY_JOB_REGISTRY_KEY)).toBeNull();
     expect(registry.get(TUTORIAL_ONBOARDING_SEEN_KEY)).toBe(false);
     expect(hasSavedProgress(registry)).toBe(false);
     expect(JSON.parse(storage.getItem(SAVE_STORAGE_KEY)!)).toEqual({
       version: 2,
       progress: { captures: [] },
-      player: { primaryJobId: "junior", secondaryJobId: null },
+      player: { primaryJobId: "junior", secondaryJobId: null, tertiaryJobId: null },
       ui: { tutorialOnboardingSeen: false },
     });
   });

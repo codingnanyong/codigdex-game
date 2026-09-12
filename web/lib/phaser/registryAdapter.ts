@@ -4,8 +4,10 @@ import { DEX_MONSTERS } from "@/lib/domain/chapters";
 import {
   findJob,
   findSecondaryJob,
+  findTertiaryJob,
   JOB_REGISTRY_KEY,
   SECONDARY_JOB_REGISTRY_KEY,
+  TERTIARY_JOB_REGISTRY_KEY,
 } from "@/lib/domain/player/jobs";
 import { createSave, parseSave } from "./save/schema";
 
@@ -51,6 +53,7 @@ export function hydrateRegistry(registry: Phaser.Data.DataManager, storage = bro
     registry.set(CARDS_KEY, cards);
     registry.set(JOB_REGISTRY_KEY, findJob(save.player.primaryJobId).id);
     registry.set(SECONDARY_JOB_REGISTRY_KEY, findSecondaryJob(save.player.secondaryJobId)?.id ?? null);
+    registry.set(TERTIARY_JOB_REGISTRY_KEY, findTertiaryJob(save.player.tertiaryJobId)?.id ?? null);
     registry.set(TUTORIAL_ONBOARDING_SEEN_KEY, save.ui.tutorialOnboardingSeen);
 
     // Copy a valid legacy save into the current slot without deleting the fallback.
@@ -68,6 +71,8 @@ export function persistRegistry(registry: Phaser.Data.DataManager, storage = bro
     primaryJobId: findJob(registry.get(JOB_REGISTRY_KEY) as string | undefined).id,
     secondaryJobId:
       findSecondaryJob(registry.get(SECONDARY_JOB_REGISTRY_KEY) as string | null | undefined)?.id ?? null,
+    tertiaryJobId:
+      findTertiaryJob(registry.get(TERTIARY_JOB_REGISTRY_KEY) as string | null | undefined)?.id ?? null,
     tutorialOnboardingSeen: registry.get(TUTORIAL_ONBOARDING_SEEN_KEY) === true,
   });
   try {
@@ -100,6 +105,7 @@ export function resetGameProgress(registry: Phaser.Data.DataManager, storage = b
   registry.set(CARDS_KEY, EMPTY_DEX_STATE.cards);
   registry.set(JOB_REGISTRY_KEY, "junior");
   registry.set(SECONDARY_JOB_REGISTRY_KEY, null);
+  registry.set(TERTIARY_JOB_REGISTRY_KEY, null);
   registry.set(TUTORIAL_ONBOARDING_SEEN_KEY, false);
   persistRegistry(registry, storage);
 }

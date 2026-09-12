@@ -51,11 +51,13 @@ export function drawConnections(
   );
   const firstCareer = careerNodes[0];
   const lastCareer = careerNodes[careerNodes.length - 1];
-  if (careerNodes.length > 1) {
+  const branchTop = Math.min(PROMOTION_NODE.y, firstCareer.y);
+  const branchBottom = Math.max(PROMOTION_NODE.y, lastCareer.y);
+  if (branchTop !== branchBottom) {
     lines.lineStyle(6, PALETTE.ink, 1);
-    lines.lineBetween(BRANCH_X, firstCareer.y, BRANCH_X, lastCareer.y);
+    lines.lineBetween(BRANCH_X, branchTop, BRANCH_X, branchBottom);
     lines.lineStyle(2, PALETTE.mutedBrown, 0.62);
-    lines.lineBetween(BRANCH_X, firstCareer.y, BRANCH_X, lastCareer.y);
+    lines.lineBetween(BRANCH_X, branchTop, BRANCH_X, branchBottom);
   }
 
   careerNodes.forEach((node) => {

@@ -22,6 +22,24 @@ export function applyPixelFontToScene(scene: Phaser.Scene) {
   });
 }
 
+/** Keeps dynamic copy inside a fixed UI plate, including after the pixel font finishes loading. */
+export function fitTextInside(
+  text: Phaser.GameObjects.Text,
+  maxWidth: number,
+  maxHeight: number
+): Phaser.GameObjects.Text {
+  const fit = () => {
+    if (!text.scene) return;
+    text.setScale(1);
+    const widthScale = text.width > 0 ? maxWidth / text.width : 1;
+    const heightScale = text.height > 0 ? maxHeight / text.height : 1;
+    text.setScale(Math.min(1, widthScale, heightScale));
+  };
+  fit();
+  whenPixelFontReady(fit);
+  return text;
+}
+
 export function createButton(
   scene: Phaser.Scene,
   x: number,
@@ -44,9 +62,9 @@ export function createButton(
       fontSize: options.fontSize ?? body.fontSize,
       color: PALETTE_HEX.cream,
       align: "center",
-      wordWrap: { width: width - 16 },
     })
     .setOrigin(0.5);
+  fitTextInside(text, width - 16, height - 10);
 
   const container = scene.add.container(x, y, [bg, text]);
 

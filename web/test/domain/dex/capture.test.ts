@@ -7,6 +7,7 @@ import {
   capturedIds,
   isSuccessfulCapture,
   requiredCorrectAnswers,
+  shouldContinueBattle,
 } from "@/lib/domain/dex/capture";
 
 describe("requiredCorrectAnswers", () => {
@@ -33,6 +34,23 @@ describe("isSuccessfulCapture", () => {
 
   it("fails for a degenerate zero-question quiz", () => {
     expect(isSuccessfulCapture(0, 0)).toBe(false);
+  });
+});
+
+describe("shouldContinueBattle", () => {
+  it("stops as soon as the pass line is reached", () => {
+    expect(shouldContinueBattle(2, 2, 3)).toBe(false);
+    expect(shouldContinueBattle(3, 4, 5)).toBe(false);
+    expect(shouldContinueBattle(5, 5, 7)).toBe(false);
+  });
+
+  it("keeps asking while the pass line is unmet and questions remain", () => {
+    expect(shouldContinueBattle(1, 2, 3)).toBe(true);
+    expect(shouldContinueBattle(2, 4, 5)).toBe(true);
+  });
+
+  it("stops after the final question even when the pass line is unmet", () => {
+    expect(shouldContinueBattle(1, 3, 3)).toBe(false);
   });
 });
 
